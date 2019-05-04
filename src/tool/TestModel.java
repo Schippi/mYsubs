@@ -22,17 +22,13 @@ class TestModel extends DefaultTableModel {
 		blackList = new ArrayList<myVidEntry>();
 	}
 
-	
-	
 	public Collection<? extends myVidEntry> getBlack() {
 		return blackList;
 	}
 
-	private static final ColumnContext[] columnArray = {
-			new ColumnContext("Date", String.class, false),
-			new ColumnContext("author", String.class, false),
-			new ColumnContext("Name", String.class, false),
-			new ColumnContext("ID", URL.class, false)};
+	private static final ColumnContext[] columnArray = { new ColumnContext("Date", String.class, false),
+			new ColumnContext("author", String.class, false), new ColumnContext("Name", String.class, false),
+			new ColumnContext("ID", URL.class, false) };
 
 	public ArrayList<myVidEntry> getDa() {
 		return data;
@@ -40,8 +36,7 @@ class TestModel extends DefaultTableModel {
 
 	public synchronized myVidEntry getDatabyURL(URL url) {
 
-		return data.get(Collections.binarySearch(data,
-				myVidEntry.getDummy(url.toExternalForm())));
+		return data.get(Collections.binarySearch(data, myVidEntry.getDummy(url.toExternalForm())));
 		// for (int i = 0; i < data.size(); i++) {
 		// if (url.toExternalForm().equals(data.get(i).get_link())) {
 		// return data.get(i);
@@ -73,20 +68,35 @@ class TestModel extends DefaultTableModel {
 	}
 
 	public synchronized void addTest(myVidEntry v) throws MalformedURLException {
+		addTest(v, true);
+
+	}
+
+	public synchronized void addTest(myVidEntry v, boolean sort) throws MalformedURLException {
+		addTest(v, sort, true);
+	}
+
+	public synchronized void addTest(myVidEntry v, boolean sort, boolean check) throws MalformedURLException {
 		URL Peter = null;
 
 		Peter = new URL(v.getLink());
-		
-		Object[] obj = { v.getDate(), v.getUser(), v.getTitle(), Peter,
-				char_x };
-		if (!data.contains(v) && !blackList.contains(v)) {
-			synchronized (data) {
-				data.add(v);
-				Collections.sort(data);
-			}
-			super.insertRow(0, obj);
-		}
 
+		Object[] obj = { v.getDate(), v.getUser(), v.getTitle(), Peter, char_x };
+		synchronized (data) {
+
+			if (!check || Collections.binarySearch(data, v) < 0 && !blackList.contains(v)) {
+
+				data.add(v);
+				if (sort)
+					Collections.sort(data);
+
+				super.insertRow(0, obj);
+			}
+		}
+	}
+
+	public synchronized void doSort() {
+		Collections.sort(data);
 	}
 
 	public synchronized void delTest(myVidEntry v) {
@@ -100,12 +110,12 @@ class TestModel extends DefaultTableModel {
 		}
 		for (i = 0; i < super.getRowCount(); i++) {
 			if (((URL) getValueAt(i, urlcol)).toString().equals(v.getLink())) {
-//				System.out.println("found: "+v.get_link());
+				// System.out.println("found: "+v.get_link());
 				synchronized (data) {
-					try{
+					try {
 						super.removeRow(i);
-					}catch(IndexOutOfBoundsException e){
-//						ignore
+					} catch (IndexOutOfBoundsException e) {
+						// ignore
 					}
 					data.remove(v);
 					Collections.sort(data);
@@ -138,14 +148,12 @@ class TestModel extends DefaultTableModel {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public
-	static class ColumnContext {
+	public static class ColumnContext {
 		public final String columnName;
 		public final Class columnClass;
 		public final boolean isEditable;
 
-		public ColumnContext(String columnName, Class columnClass,
-				boolean isEditable) {
+		public ColumnContext(String columnName, Class columnClass, boolean isEditable) {
 			this.columnName = columnName;
 			this.columnClass = columnClass;
 			this.isEditable = isEditable;

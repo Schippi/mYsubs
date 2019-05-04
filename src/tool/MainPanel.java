@@ -2753,11 +2753,13 @@ public class MainPanel extends JPanel implements ClipboardOwner {
 			int x = a / 10;
 			for (int i = 0; i < a; i++) {
 				myVidEntry mve = (myVidEntry) inobj.readObject();
-				model.addTest(mve);
+				model.addTest(mve,false,false);
 				if (i % x == 0 && jb != null) {
 					jb.setValue(jb.getValue() + 5);
 				}
 			}
+			model.doSort();
+			
 			b = ((String) inobj.readObject());
 			wantTray.setSelected(b.equals(BOOLEAN_STRING_TRUE));
 
@@ -3108,6 +3110,7 @@ public class MainPanel extends JPanel implements ClipboardOwner {
 				}
 			}
 		}
+		model.doSort();
 		for (int k = 0; k < thr.length; k++) {
 			if (thr[k].getEx() != null) {
 				ex = thr[k].getEx();
@@ -3234,7 +3237,7 @@ public class MainPanel extends JPanel implements ClipboardOwner {
 				// System.out.println(pi.getSnippet().getTitle());
 				myVidEntry x = new myVidEntry(pi);
 				if (!model.getDa().contains(x) && !model.getBlack().contains(x)) {
-					model.addTest(x);
+					model.addTest(x,false);
 					i++;
 				}
 			}
