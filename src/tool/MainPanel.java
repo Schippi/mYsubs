@@ -62,6 +62,8 @@ import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
@@ -142,6 +144,7 @@ import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
 import com.google.api.services.youtube.model.PlaylistItemSnippet;
+import com.google.api.services.youtube.model.PlaylistListResponse;
 import com.google.api.services.youtube.model.PlaylistSnippet;
 import com.google.api.services.youtube.model.PlaylistStatus;
 import com.google.api.services.youtube.model.ResourceId;
@@ -2327,7 +2330,7 @@ public class MainPanel extends JPanel implements ClipboardOwner {
 				List<String> scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube");
 				Credential credential = null;
 				try {
-					credential = Auth.authorize(scopes, "playlistupdates");
+					credential = Auth.authorize(scopes, "mYsubs");
 				} catch (IOException e1) {
 					log(e1);
 					e1.printStackTrace();
@@ -2338,8 +2341,8 @@ public class MainPanel extends JPanel implements ClipboardOwner {
 
 				try {
 					PlaylistSnippet playlistSnippet = new PlaylistSnippet();
-					playlistSnippet.setTitle("Test Playlist " + Calendar.getInstance().getTime());
-					playlistSnippet.setDescription("A private playlist created with the YouTube API v3");
+					playlistSnippet.setTitle("mYsubs " + Calendar.getInstance().getTime());
+					playlistSnippet.setDescription("A private playlist created with mYsubs");
 					PlaylistStatus playlistStatus = new PlaylistStatus();
 					playlistStatus.setPrivacyStatus("private");
 
@@ -2350,6 +2353,13 @@ public class MainPanel extends JPanel implements ClipboardOwner {
 					// Call the API to insert the new playlist. In the API call, the first
 					// argument identifies the resource parts that the API response should
 					// contain, and the second argument is the playlist being inserted.
+					PlaylistListResponse plr = youtube.playlists().list("snippet").setMine(true).setMaxResults(50l).execute();
+					for (Playlist pl : plr.getItems()) {
+						if(pl.getSnippet().getTitle().startsWith("mYsubs")) {
+							youtube.playlists().delete(pl.getId()).execute();
+						}
+					}
+					
 					YouTube.Playlists.Insert playlistInsertCommand = youtube.playlists().insert("snippet,status",
 							youTubePlaylist);
 					Playlist playlistInserted = playlistInsertCommand.execute();
@@ -2364,12 +2374,13 @@ public class MainPanel extends JPanel implements ClipboardOwner {
 					if (backToFront.isSelected()) {
 						frame.addWindowFocusListener(new JumpBackListener());
 					}
-					// Desktop.getDesktop().browse(
-					// new URI(myPlaylist.getHtmlLink().getHref()));
+//					playlistInserted.get
+					 Desktop.getDesktop().browse(
+					 new URI("https://www.youtube.com/playlist?list="+playlistInserted.getId()));
 					// TODO
 					info.setText(TEXT_NOTHING);
 
-				} catch (IOException e) {
+				} catch (IOException | URISyntaxException e) {
 					info.setText(ERROR_PLAYLIST);
 					log(e);
 				}
@@ -2978,7 +2989,7 @@ public class MainPanel extends JPanel implements ClipboardOwner {
 		Credential credential = null;
 		try {
 			credential = Auth.authorize(Lists.newArrayList("https://www.googleapis.com/auth/youtube"),
-					"mYsubsYTService");
+					"mYsubs");
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
